@@ -1,0 +1,75 @@
+name: Build libFreeCADGui.so Only
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-gui-so:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Pixi
+        uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          pixi-version: latest
+          cache: true
+
+      - name: Configure Minimal CMake
+        run: |
+          rm -rf build
+          pixi run cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$PWD/.pixi/envs/default" \
+            -DSWIG_EXECUTABLE="$PWD/.pixi/envs/default/bin/swig" \
+            -DBUILD_TEST=OFF \
+            -DBUILD_ADDONMGR=OFF \
+            -DBUILD_ARCH=OFF \
+            -DBUILD_ASSEMBLY=OFF \
+            -DBUILD_BIM=OFF \
+            -DBUILD_CAM=OFF \
+            -DBUILD_CLOUD=OFF \
+            -DBUILD_DRAFT=OFF \
+            -DBUILD_DRAWING=OFF \
+            -DBUILD_FEM=OFF \
+            -DBUILD_FLAT_MESH=OFF \
+            -DBUILD_IDF=OFF \
+            -DBUILD_IMPORT=OFF \
+            -DBUILD_INSPECTION=OFF \
+            -DBUILD_JTREADER=OFF \
+            -DBUILD_MATERIAL=OFF \
+            -DBUILD_MEASURE=OFF \
+            -DBUILD_MESH=OFF \
+            -DBUILD_MESH_PART=OFF \
+            -DBUILD_OPENSCAD=OFF \
+            -DBUILD_PART=OFF \
+            -DBUILD_PART_DESIGN=OFF \
+            -DBUILD_PATH=OFF \
+            -DBUILD_PLOT=OFF \
+            -DBUILD_POINTS=OFF \
+            -DBUILD_REVERSEENGINEERING=OFF \
+            -DBUILD_ROBOT=OFF \
+            -DBUILD_SANDBOX=OFF \
+            -DBUILD_SHOW=OFF \
+            -DBUILD_SKETCHER=OFF \
+            -DBUILD_SPREADSHEET=OFF \
+            -DBUILD_START=OFF \
+            -DBUILD_SURFACE=OFF \
+            -DBUILD_TECHDRAW=OFF \
+            -DBUILD_TUX=OFF \
+            -DBUILD_WEB=OFF
+
+      - name: Build FreeCADGui Only
+        run: |
+          pixi run cmake --build build --target FreeCADGui -j$(nproc)
+
+      - name: Upload libFreeCADGui.so
+        uses: actions/upload-artifact@v4
+        with:
+          name: libFreeCADGui-so
+          path: build/lib/libFreeCADGui.so*
+          retention-days: 7
+
