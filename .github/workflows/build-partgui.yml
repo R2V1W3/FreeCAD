@@ -1,0 +1,32 @@
+name: Build PartGui Only (6135077)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-partgui:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout FreeCAD at 6135077
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          pixi-version: latest
+          cache: true
+
+      - name: Configure CMake via Pixi
+        run: pixi run configure
+
+      - name: Compile PartGui Target Only
+        run: pixi run cmake --build build --target PartGui -- -j$(nproc)
+
+      - name: Upload PartGui.so Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PartGui-6135077
+          path: build/Mod/Part/PartGui.so
+          retention-days: 1
