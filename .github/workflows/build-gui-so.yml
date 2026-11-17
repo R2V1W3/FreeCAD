@@ -1,4 +1,4 @@
-name: Branch Workflow Placeholder
+name: Build libFreeCADGui.so Only
 
 on:
   workflow_dispatch:
